@@ -7,7 +7,7 @@
 
 #define MAX_LINE_LEN 200
 #define HT_ELEMENT_NUM 2000
-#define DIFF_SECOND_NUM 180
+#define DIFF_SECOND_NUM 10
 #define PCAP_FILE_PATH_LEN 200
 #define PCAP_CONFIG_PATH "./conf/mode.conf"
 
@@ -26,7 +26,7 @@ typedef struct _s_pkt_global_{
 	char *log_file;
     char *pcap_path;
     htable_t *ht;
-    time_t loop_s_time;
+    int loop_s_time;
     int loop_cnt;
     
 }s_pkt_gl;

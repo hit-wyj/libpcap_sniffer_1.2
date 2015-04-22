@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <netinet/udp.h>
 #include <netinet/if_ether.h>
@@ -17,18 +18,25 @@
 static void echo_htable(s_pkt_gl * pkt_gl){
     
     htable_t * ht = pkt_gl->ht;
-    s_ip_ele_gl * ip_ele_sr_tmp;
+   // s_ip_ele_gl * ip_ele_sr_tmp;
+    void *e;
+    int node_cont = ht->nodecount;
     if (!ht){
         printf("HTable is Empty \n");
         return;
     }
     printf("***********This is the %d loop************\n", pkt_gl->loop_cnt);
     int i;
-    for (i = 0; i < ht->tablelen; i++) {
-        ip_ele_sr_tmp = (s_ip_ele_gl *)ht->table[i];
-        while (NULL != ip_ele_sr_tmp) {
-            ip_ele_sr_tmp = (s_ip_ele_gl *)*(unsigned long *)(ip_ele_sr_tmp + ht->offset);
-            printf("IP is:%s\t The Count is:%d\n", inet_ntoa(ip_ele_sr_tmp->ip_ele.sin_addr),ip_ele_sr_tmp->ip_cnt);
+    for (i = 0; i < ht->tablelen && node_cont > 0; i++) {
+        e=ht->table[i];
+        while (NULL != e) {
+            s_ip_ele_gl * ip_ele_tmp = (s_ip_ele_gl *)e;
+           // ip_ele_sr_tmp = (s_ip_ele_gl *)*(unsigned long *)(ip_ele_sr_tmp + ht->offset);
+            //printf("IP is:%s\t The Count is:%d\n", inet_ntoa(ip_ele_sr_tmp->ip_ele.sin_addr),ip_ele_sr_tmp->ip_cnt);
+            printf("IP is:%s\t", inet_ntoa(ip_ele_tmp->ip_ele.sin_addr));
+            printf("IP count is:%d\n",ip_ele_tmp->ip_cnt);
+            e = (void *)*(unsigned long *)(e + ht->offset);
+            node_cont--;
         }
     }
     
@@ -51,9 +59,13 @@ void pkt_callback(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *
     dest.sin_addr.s_addr = iph->ip_dst;
     s_ip_ele_gl  ip_ele_tmp;
     ip_ele_tmp.ip_ele = source;
-    time_t now_time;
-    if (!pkt_gl->pkt_src_mod && (time(&now_time) - time(&(pkt_gl->loop_s_time)) > DIFF_SECOND_NUM)){
-        pkt_gl->loop_s_time = now_time;
+   // time_t now_time;
+   //printf("The source  ip is %s\n",inet_ntoa(source.sin_addr));
+   int now_secs;
+   now_secs = time(NULL);
+    //printf("the diff time is :%d\n",time((time_t *)NULL)-time(&(pkt_gl->loop_s_time)));
+    if ((!pkt_gl->pkt_src_mod) && (now_secs -pkt_gl->loop_s_time) > DIFF_SECOND_NUM){
+        pkt_gl->loop_s_time = now_secs;
         pkt_gl->loop_cnt++;
         echo_htable(pkt_gl);
         htable_init(pkt_gl->ht);
@@ -75,9 +87,9 @@ void pkt_callback(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *
     
     ip_ele_tmp.ip_ele = dest;
     s_ip_ele_gl * ip_ele_sr2 = htable_search(pkt_gl->ht, &ip_ele_tmp);
-    if (ip_ele_sr2) {
+    if (!ip_ele_sr2) {
         ip_ele_sr2 = (s_ip_ele_gl *)malloc(sizeof(s_ip_ele_gl));
-        ip_ele_sr2->ip_ele = source;
+        ip_ele_sr2->ip_ele = dest;
         ip_ele_sr2->ip_cnt = 1;
         htable_insert(pkt_gl->ht, ip_ele_sr2);
     }else{

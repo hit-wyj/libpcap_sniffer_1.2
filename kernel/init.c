@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "init.h"
 #include "pkt.h"
 
@@ -15,7 +16,7 @@ static int ip_hash_cmp(void *value1, void *value2){
 
     s_ip_ele_gl *v1 = (s_ip_ele_gl *)value1;
     s_ip_ele_gl *v2 = (s_ip_ele_gl *)value2;
-    return (v1->ip_ele.sin_addr.s_addr == v2->ip_ele.sin_addr.s_addr) ? 1 : 0;
+    return (v1->ip_ele.sin_addr.s_addr == v2->ip_ele.sin_addr.s_addr) ? 0 : 1;
     
 }
 
@@ -68,11 +69,12 @@ static void read_config(s_pkt_gl *pkt_gl){
 void* pkt_init(){
 
 	s_pkt_gl *pkt_gl = (s_pkt_gl *)malloc(sizeof(s_pkt_gl));
-    
-    pkt_gl->loop_s_time = time((time_t *)NULL);
+
+    pkt_gl->loop_s_time = time(NULL);
+//    printf("current time is %d\n",pkt_gl->loop_s_time);
     
     read_config(pkt_gl);
-	
+    gl_htable_init(pkt_gl);	
 	char *dev; 
 	char errbuf[PCAP_ERRBUF_SIZE];
 	
