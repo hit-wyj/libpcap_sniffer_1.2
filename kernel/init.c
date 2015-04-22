@@ -52,7 +52,7 @@ static void read_config(s_pkt_gl *pkt_gl){
                 char * src_tmp = strstr(lineBuffer, "=");
                 if(src_tmp){
                     pkt_gl->pcap_path = (char *)malloc(PCAP_FILE_PATH_LEN);
-                    memcpy(pkt_gl->pcap_path, src_tmp + 1, strlen(src_tmp) -3);
+                    memcpy(pkt_gl->pcap_path, src_tmp + 1, strlen(src_tmp) -2);
                 }
                 
             }
