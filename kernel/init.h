@@ -6,7 +6,5 @@
 
 void* pkt_init();
 
-static void read_config();
-
 #endif
 
