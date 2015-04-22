@@ -50,9 +50,9 @@ static void read_config(s_pkt_gl *pkt_gl){
                 pkt_gl->pkt_src_mod = 1;
             }else if (strstr(lineBuffer,"FILEPATH")){
                 char * src_tmp = strstr(lineBuffer, "=");
-                if(!src_tmp){
+                if(src_tmp){
                     pkt_gl->pcap_path = (char *)malloc(PCAP_FILE_PATH_LEN);
-                    memcpy(pkt_gl->pcap_path, src_tmp + 1, sizeof(src_tmp) -1);
+                    memcpy(pkt_gl->pcap_path, src_tmp + 1, strlen(src_tmp) -1);
                 }
                 
             }
