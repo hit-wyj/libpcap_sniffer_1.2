@@ -105,8 +105,13 @@ void pkt_proc(s_pkt_gl* pkt_gl){
 	
 	pcap_t* descr;
     char errbuf[PCAP_ERRBUF_SIZE];
-    
-    pkt_gl->pkt_src_mod ? (descr = pcap_open_offline(pkt_gl->dev, pkt_gl->pcap_path)) : (descr = pcap_open_live(pkt_gl->dev,BUFSIZ,0,-1,errbuf));
+    printf("hi\n"); 
+    FILE *fp = fopen("./pcap_file/http.pcap","r");
+    if(!fp){
+        printf("open pcap file error !\n");
+    }
+    descr = pcap_fopen_offline(fp,errbuf);
+   // pkt_gl->pkt_src_mod ? (descr = pcap_open_offline(pkt_gl->dev, pkt_gl->pcap_path)) : (descr = pcap_open_live(pkt_gl->dev,BUFSIZ,0,-1,errbuf));
 
 	if(descr == NULL){ 
 		printf("pcap_open_live(): %s/n",errbuf); 
