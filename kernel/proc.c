@@ -62,7 +62,7 @@ void pkt_callback(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *
    // time_t now_time;
    //printf("The source  ip is %s\n",inet_ntoa(source.sin_addr));
    int now_secs;
-   now_secs = time(NULL);
+   now_secs = time((time_t *)NULL);
     //printf("the diff time is :%d\n",time((time_t *)NULL)-time(&(pkt_gl->loop_s_time)));
     if ((!pkt_gl->pkt_src_mod) && (now_secs -pkt_gl->loop_s_time) > DIFF_SECOND_NUM){
         pkt_gl->loop_s_time = now_secs;
@@ -105,15 +105,20 @@ void pkt_proc(s_pkt_gl* pkt_gl){
 	
 	pcap_t* descr;
     char errbuf[PCAP_ERRBUF_SIZE];
-    printf("hi\n"); 
-    FILE *fp = fopen("./pcap_file/http.pcap","r");
-    if(!fp){
-        printf("open pcap file error !\n");
+    FILE *offline_fp = NULL;
+    
+    if (pkt_gl->pkt_src_mod) {
+        offline_fp= fopen(pkt_gl->pcap_path,"r");
+        if(!offline_fp){
+            printf("open pcap file error !\n");
+            return;
+        }
+        descr = pcap_fopen_offline(offline_fp,errbuf);
+    }else{
+        descr = pcap_open_live(pkt_gl->dev,BUFSIZ,0,-1,errbuf);
     }
-    descr = pcap_fopen_offline(fp,errbuf);
-   // pkt_gl->pkt_src_mod ? (descr = pcap_open_offline(pkt_gl->dev, pkt_gl->pcap_path)) : (descr = pcap_open_live(pkt_gl->dev,BUFSIZ,0,-1,errbuf));
-
-	if(descr == NULL){ 
+    
+	if(descr == NULL){
 		printf("pcap_open_live(): %s/n",errbuf); 
 		return;
 	}
@@ -121,5 +126,9 @@ void pkt_proc(s_pkt_gl* pkt_gl){
 	pcap_loop(descr, -1 , pkt_callback , (u_char *)pkt_gl);
     
     pkt_gl->pkt_src_mod ? (echo_htable(pkt_gl)) : 0;
+    
+    if (offline_fp) {
+        fclose(offline_fp);
+    }
     
 }

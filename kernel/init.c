@@ -71,10 +71,11 @@ void* pkt_init(){
 	s_pkt_gl *pkt_gl = (s_pkt_gl *)malloc(sizeof(s_pkt_gl));
 
     pkt_gl->loop_s_time = time(NULL);
-//    printf("current time is %d\n",pkt_gl->loop_s_time);
-    
+
     read_config(pkt_gl);
-    gl_htable_init(pkt_gl);	
+    
+    gl_htable_init(pkt_gl);
+    
 	char *dev; 
 	char errbuf[PCAP_ERRBUF_SIZE];
 	
